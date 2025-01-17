@@ -2,6 +2,7 @@ package br.com.lsimteste.pagamentos.controller;
 
 import br.com.lsimteste.pagamentos.dtos.PagamentoDTO;
 import br.com.lsimteste.pagamentos.services.PagamentoService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,4 +56,15 @@ public class PagamentoController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/confirmar")
+    @CircuitBreaker(name = "atualizaPedido", fallbackMethod = "pagamentoAutorizadoComIntegracaoPendente")
+    public void confirmarPagamento(@PathVariable @NotNull Long id){
+        pagamentoService.confirmarPagamento(id);
+    }
+
+    public void pagamentoAutorizadoComIntegracaoPendente(Long id, Exception e){
+        pagamentoService.alterarStatus(id);
+    }
+
 }
