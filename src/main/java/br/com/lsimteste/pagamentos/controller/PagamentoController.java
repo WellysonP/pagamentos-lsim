@@ -5,6 +5,8 @@ import br.com.lsimteste.pagamentos.services.PagamentoService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,9 @@ public class PagamentoController {
 
     @Autowired
     private PagamentoService pagamentoService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Operation(summary = "Listar pagamentos", description = "Retorna uma lista paginada de pagamentos")
     @GetMapping
@@ -45,6 +50,8 @@ public class PagamentoController {
         PagamentoDTO pagamento = pagamentoService.criarPagamento(pagamentoDTO);
 
         URI endereco = uriBuilder.path("/pagamentos/{id}").buildAndExpand(pagamento.getId()).toUri();
+
+        rabbitTemplate.convertAndSend("pagamentos.ex","", pagamento);
 
         return ResponseEntity.created(endereco).body(pagamento);
     }

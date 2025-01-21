@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface PedidoClient {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/pedidos/{id}/pago")
-    void atualizaPagamento(@PathVariable Long id);
+    void atualizaPagamento(@PathVariable("id") Long id);
 }
